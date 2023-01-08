@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item
+    android:title="@string/trackslist"
+    android:id="@+id/btm_tracks"
+    android:icon="@drawable/ic_tracklist">
+</item>
+    <item
+        android:title="@string/home"
+        android:id="@+id/btm_home"
+        android:icon="@drawable/ic_home">
+    </item>
+    <item
+        android:title="@string/settings"
+        android:id="@+id/btm_settings"
+        android:icon="@drawable/ic_settings">
+    </item>
+</menu>
