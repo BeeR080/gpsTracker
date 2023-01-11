@@ -1,10 +1,12 @@
 package com.beer080.gpstracker.main.utils
 
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.beer080.gpstracker.R
 
 fun Fragment.openFragment(frag: Fragment){
+
     activity?.supportFragmentManager
         ?.beginTransaction()
         ?.setCustomAnimations(android.R.anim.slide_in_left,android.R.anim.slide_out_right)
@@ -13,6 +15,10 @@ fun Fragment.openFragment(frag: Fragment){
 }
 
 fun AppCompatActivity.openFragment(frag: Fragment){
+    if(supportFragmentManager.fragments.isNotEmpty()){
+        if(supportFragmentManager.fragments[0].javaClass ==frag.javaClass)
+           return
+    }
     supportFragmentManager
         .beginTransaction()
         .setCustomAnimations(android.R.anim.slide_in_left,android.R.anim.slide_out_right)

@@ -2,6 +2,11 @@
     <string name="app_name">gpsTracker</string>
     <string name="trackslist">Tracks List</string>
     <string name="home">Home</string>
+    <string name="update_time">Update time</string>
+    <string name="update_color">Track color</string>
+    <string name="update_time_summary">Location update time</string>
+    <string name="update_color_summary">Choose track color</string>
+    <string name="location">Location</string>
     <string name="settings">Settings</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

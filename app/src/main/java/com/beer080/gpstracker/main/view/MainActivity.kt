@@ -1,14 +1,11 @@
 package com.beer080.gpstracker.main.view
-
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
-import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AppCompatActivity
 import com.beer080.gpstracker.R
 import com.beer080.gpstracker.databinding.ActivityMainBinding
 import com.beer080.gpstracker.main.utils.openFragment
 import com.beer080.gpstracker.main.view.fragments.HomeFragment
-import com.beer080.gpstracker.main.view.fragments.SettingsFragment
+import com.beer080.gpstracker.main.view.fragments.SettingsFragmnet
 import com.beer080.gpstracker.main.view.fragments.TracksFragment
 
 class MainActivity : AppCompatActivity() {
@@ -27,7 +24,7 @@ class MainActivity : AppCompatActivity() {
                 when(it.itemId){
                     R.id.btm_tracks -> openFragment(TracksFragment.newInstance())
                     R.id.btm_home -> openFragment(HomeFragment.newInstance())
-                    R.id.btm_settings -> openFragment(SettingsFragment.newInstance())
+                    R.id.btm_settings -> openFragment(SettingsFragmnet())
                 }
                 true
             }
