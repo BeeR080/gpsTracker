@@ -10,6 +10,7 @@ import android.provider.Settings
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -18,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import com.beer080.gpstracker.R
 import com.beer080.gpstracker.databinding.FragmentHomeBinding
+import com.beer080.gpstracker.main.data.LocationService
 import com.beer080.gpstracker.main.utils.DialogManager
 import com.beer080.gpstracker.main.utils.chekPermisson
 import org.osmdroid.config.Configuration
@@ -28,7 +30,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 
 class HomeFragment : Fragment() {
-
+private var isServiceRunning = false
 private lateinit var binding: FragmentHomeBinding
 private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
 
@@ -43,6 +45,8 @@ private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         registerPermissions()
+        setOnClicks()
+        checkServiceState()
 
     }
 
@@ -148,6 +152,44 @@ private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
                 .show()
 
         }
+    }
+    private fun setOnClicks() = with(binding){
+        val listener = onClicks()
+        fbtStartRecTracks.setOnClickListener(listener)
+
+    }
+
+    private fun onClicks():OnClickListener{
+        return OnClickListener {
+            when(it.id){
+                R.id.fbt_startRecTracks ->stopStartLocService()
+            }
+        }
+    }
+    private fun startLocService(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            activity?.startForegroundService(Intent(activity,LocationService::class.java))
+        }else{
+            activity?.startService(Intent(activity,LocationService::class.java))
+        }
+        binding.fbtStartRecTracks.setImageResource(R.drawable.ic_stoptracking)
+    }
+    private fun checkServiceState(){
+        isServiceRunning = LocationService.isServiceRunnig
+        if (isServiceRunning){
+            binding.fbtStartRecTracks.setImageResource(R.drawable.ic_stoptracking)
+        }
+
+    }
+
+    private fun stopStartLocService(){
+if(!isServiceRunning){
+    startLocService()
+}else{
+    activity?.stopService(Intent(activity, LocationService::class.java))
+    binding.fbtStartRecTracks.setImageResource(R.drawable.ic_starttracking)
+}
+        isServiceRunning = !isServiceRunning
     }
 
     companion object {
