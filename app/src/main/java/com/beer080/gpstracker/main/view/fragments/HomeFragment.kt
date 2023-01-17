@@ -7,7 +7,6 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
@@ -16,21 +15,26 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.getSystemService
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import com.beer080.gpstracker.R
 import com.beer080.gpstracker.databinding.FragmentHomeBinding
 import com.beer080.gpstracker.main.data.LocationService
 import com.beer080.gpstracker.main.utils.DialogManager
+import com.beer080.gpstracker.main.utils.TimeUtils
 import com.beer080.gpstracker.main.utils.chekPermisson
 import org.osmdroid.config.Configuration
 import org.osmdroid.library.BuildConfig
-import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.util.*
 
 
 class HomeFragment : Fragment() {
 private var isServiceRunning = false
+    private var timer: Timer? = null
+    private var startTime = 0L
+    private val timeData = MutableLiveData<String>()
 private lateinit var binding: FragmentHomeBinding
 private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
 
@@ -47,6 +51,7 @@ private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
         registerPermissions()
         setOnClicks()
         checkServiceState()
+        updateTimeView()
 
     }
 
@@ -166,6 +171,43 @@ private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
             }
         }
     }
+
+    private fun updateTimeView(){
+timeData.observe(viewLifecycleOwner){
+binding.hfTvTime.text = it
+}
+    }
+
+    private fun startTimer(){
+       timer?.cancel()
+        timer = Timer()
+        startTime = LocationService.serviceStarting
+        timer?.schedule(object : TimerTask(){
+            override fun run() {
+               activity?.runOnUiThread {
+                   timeData.value = getCurrentTime()
+               }
+            }
+
+        }
+            ,1000
+            ,1000
+        )
+    }
+
+    private fun getCurrentTime(): String{
+        return "Time: ${TimeUtils.getTime(System.currentTimeMillis()- startTime)}"
+    }
+    private fun checkServiceState(){
+        isServiceRunning = LocationService.isServiceRunnig
+        if (isServiceRunning){
+            binding.fbtStartRecTracks.setImageResource(R.drawable.ic_stoptracking)
+            startTimer()
+
+        }
+
+    }
+
     private fun startLocService(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             activity?.startForegroundService(Intent(activity,LocationService::class.java))
@@ -173,14 +215,10 @@ private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
             activity?.startService(Intent(activity,LocationService::class.java))
         }
         binding.fbtStartRecTracks.setImageResource(R.drawable.ic_stoptracking)
+        LocationService.serviceStarting = System.currentTimeMillis()
+        startTimer()
     }
-    private fun checkServiceState(){
-        isServiceRunning = LocationService.isServiceRunnig
-        if (isServiceRunning){
-            binding.fbtStartRecTracks.setImageResource(R.drawable.ic_stoptracking)
-        }
 
-    }
 
     private fun stopStartLocService(){
 if(!isServiceRunning){
@@ -188,6 +226,7 @@ if(!isServiceRunning){
 }else{
     activity?.stopService(Intent(activity, LocationService::class.java))
     binding.fbtStartRecTracks.setImageResource(R.drawable.ic_starttracking)
+    timer?.cancel()
 }
         isServiceRunning = !isServiceRunning
     }
