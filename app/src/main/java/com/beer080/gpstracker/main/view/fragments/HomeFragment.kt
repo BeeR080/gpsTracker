@@ -1,12 +1,15 @@
 package com.beer080.gpstracker.main.view.fragments
 
 import android.Manifest
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
@@ -16,9 +19,13 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.beer080.gpstracker.R
 import com.beer080.gpstracker.databinding.FragmentHomeBinding
+import com.beer080.gpstracker.main.HomeViewModel
+import com.beer080.gpstracker.main.data.LocationModel
 import com.beer080.gpstracker.main.data.LocationService
 import com.beer080.gpstracker.main.utils.DialogManager
 import com.beer080.gpstracker.main.utils.TimeUtils
@@ -34,9 +41,9 @@ class HomeFragment : Fragment() {
 private var isServiceRunning = false
     private var timer: Timer? = null
     private var startTime = 0L
-    private val timeData = MutableLiveData<String>()
 private lateinit var binding: FragmentHomeBinding
 private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
+private val model: HomeViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,6 +59,8 @@ private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
         setOnClicks()
         checkServiceState()
         updateTimeView()
+        registerLocReceiver()
+        locationUpdates()
 
     }
 
@@ -172,8 +181,19 @@ private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
         }
     }
 
+    private fun locationUpdates() = with(binding){
+        model.locationUpdates.observe(viewLifecycleOwner){
+        val distance = "Distance: ${String.format("%.1f", it.distance)} m"
+        val velocity = "Velocity: ${String.format("%.1f", 3.6f * it.velocity)} km/h"
+            val avrgVelocity = "Average Velocity: ${getAverageSpeed(it.distance)} km/h"
+            hfTvDistance.text=distance
+            hfTvVelocity.text=velocity
+            hfTvAvgVelocity.text=avrgVelocity
+        }
+    }
+
     private fun updateTimeView(){
-timeData.observe(viewLifecycleOwner){
+model.timeData.observe(viewLifecycleOwner){
 binding.hfTvTime.text = it
 }
     }
@@ -185,7 +205,7 @@ binding.hfTvTime.text = it
         timer?.schedule(object : TimerTask(){
             override fun run() {
                activity?.runOnUiThread {
-                   timeData.value = getCurrentTime()
+                   model.timeData.value = getCurrentTime()
                }
             }
 
@@ -229,6 +249,26 @@ if(!isServiceRunning){
     timer?.cancel()
 }
         isServiceRunning = !isServiceRunning
+    }
+
+    private fun getAverageSpeed(distance: Float): String{
+
+        return String.format("%.1f",3.6f *( distance / ((System.currentTimeMillis() - startTime) / 1000.0f)))
+    }
+
+    private val receiver = object: BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if(intent?.action == LocationService.LOC_MODEL_INTENT){
+                val locModel = intent.getSerializableExtra(LocationService.LOC_MODEL_INTENT) as LocationModel
+                model.locationUpdates.value = locModel
+                Log.d("MyLog", "Distance: ${locModel.distance}")
+            }
+        }
+    }
+    private fun registerLocReceiver(){
+        val locFilter = IntentFilter(LocationService.LOC_MODEL_INTENT)
+        LocalBroadcastManager.getInstance(activity as AppCompatActivity)
+            .registerReceiver(receiver, locFilter)
     }
 
     companion object {
