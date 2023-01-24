@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
@@ -25,25 +26,36 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.beer080.gpstracker.R
 import com.beer080.gpstracker.databinding.FragmentHomeBinding
 import com.beer080.gpstracker.main.HomeViewModel
+import com.beer080.gpstracker.main.MainApp
 import com.beer080.gpstracker.main.data.LocationModel
 import com.beer080.gpstracker.main.data.LocationService
+import com.beer080.gpstracker.main.data.TrackItem
 import com.beer080.gpstracker.main.utils.DialogManager
 import com.beer080.gpstracker.main.utils.TimeUtils
 import com.beer080.gpstracker.main.utils.chekPermisson
 import org.osmdroid.config.Configuration
 import org.osmdroid.library.BuildConfig
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.util.*
 
 
 class HomeFragment : Fragment() {
+private var locModel: LocationModel? = null
+    private var polyline: Polyline?=null
+private var firstStart = true
 private var isServiceRunning = false
     private var timer: Timer? = null
     private var startTime = 0L
 private lateinit var binding: FragmentHomeBinding
 private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
-private val model: HomeViewModel by activityViewModels()
+
+
+private val model: HomeViewModel by activityViewModels{
+    HomeViewModel.ViewModelFactory((requireContext().applicationContext as MainApp).database)
+}
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,6 +74,7 @@ private val model: HomeViewModel by activityViewModels()
         registerLocReceiver()
         locationUpdates()
 
+
     }
 
     override fun onResume() {
@@ -78,6 +91,9 @@ private val model: HomeViewModel by activityViewModels()
     }
 
     private fun initMap() = with(binding){
+        polyline = Polyline()
+        polyline?.outlinePaint?.color= Color.MAGENTA
+
         map.controller.setZoom(20.0)
         val mLocation = GpsMyLocationProvider(activity)
         val mLocOverlay = MyLocationNewOverlay(mLocation,map)
@@ -87,6 +103,7 @@ private val model: HomeViewModel by activityViewModels()
             runOnFirstFix {
                 map.overlays.clear()
                 map.overlays.add(mLocOverlay)
+                map.overlays.add(polyline)
             }
         }
 
@@ -186,9 +203,11 @@ private val model: HomeViewModel by activityViewModels()
         val distance = "Distance: ${String.format("%.1f", it.distance)} m"
         val velocity = "Velocity: ${String.format("%.1f", 3.6f * it.velocity)} km/h"
             val avrgVelocity = "Average Velocity: ${getAverageSpeed(it.distance)} km/h"
-            hfTvDistance.text=distance
-            hfTvVelocity.text=velocity
-            hfTvAvgVelocity.text=avrgVelocity
+            hfTvDistance.text= distance
+            hfTvVelocity.text= velocity
+            hfTvAvgVelocity.text= avrgVelocity
+            locModel = it
+            updatePolyline(it.geoPointList)
         }
     }
 
@@ -216,7 +235,16 @@ binding.hfTvTime.text = it
     }
 
     private fun getCurrentTime(): String{
-        return "Time: ${TimeUtils.getTime(System.currentTimeMillis()- startTime)}"
+        return TimeUtils.getTime(System.currentTimeMillis()- startTime)
+    }
+
+    private fun geoPointsToString(list: List<GeoPoint>): String{
+        val stringBuilder = StringBuilder()
+        list.forEach {
+            stringBuilder.append("${it.latitude}, ${it.longitude}/")
+        }
+        Log.d("MyLog", "Points: $stringBuilder")
+        return stringBuilder.toString()
     }
     private fun checkServiceState(){
         isServiceRunning = LocationService.isServiceRunnig
@@ -238,8 +266,6 @@ binding.hfTvTime.text = it
         LocationService.serviceStarting = System.currentTimeMillis()
         startTimer()
     }
-
-
     private fun stopStartLocService(){
 if(!isServiceRunning){
     startLocService()
@@ -247,8 +273,30 @@ if(!isServiceRunning){
     activity?.stopService(Intent(activity, LocationService::class.java))
     binding.fbtStartRecTracks.setImageResource(R.drawable.ic_starttracking)
     timer?.cancel()
+    val trackList = getTrackItem()
+    DialogManager.showSaveDialog(
+        requireContext(),
+        trackList,
+        object : DialogManager.Listener{
+
+        override fun onClick() {
+            model.addTracks(trackList)
+        }
+
+    })
 }
         isServiceRunning = !isServiceRunning
+    }
+    private fun getTrackItem():TrackItem{
+        return TrackItem(
+            null,
+            getCurrentTime(),
+            TimeUtils.getDate(),
+            String.format("%.1f", locModel?.distance?.div( 1000) ?: 0),
+            getAverageSpeed(locModel?.distance ?: 0.0f),
+            geoPointsToString(locModel?.geoPointList ?: listOf())
+
+        )
     }
 
     private fun getAverageSpeed(distance: Float): String{
@@ -271,6 +319,29 @@ if(!isServiceRunning){
             .registerReceiver(receiver, locFilter)
     }
 
+    private fun addPoint(list: List<GeoPoint>){
+        polyline?.addPoint(list[list.size - 1])
+
+    }
+    private fun  fillPolyline(list: List<GeoPoint>){
+        list.forEach{
+            polyline?.addPoint(it)
+        }
+    }
+    private fun updatePolyline(list: List<GeoPoint>){
+    if (list.size > 1 && firstStart){
+        fillPolyline(list)
+        firstStart = false
+    }else{
+        addPoint(list)
+    }
+}
+
+    override fun onDetach() {
+        super.onDetach()
+        LocalBroadcastManager.getInstance(activity as AppCompatActivity)
+            .unregisterReceiver(receiver)
+    }
     companion object {
         @JvmStatic
         fun newInstance() = HomeFragment()

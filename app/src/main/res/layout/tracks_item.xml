@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="4dp"
+    android:layout_marginEnd="4dp"
+    android:layout_marginTop="4dp"
+    app:cardCornerRadius="8dp"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:id="@+id/tf_tvdate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/aldrich"
+            android:text="12/10/2022 13:00"
+            android:textColor="@color/purple_500"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tf_tvdistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/aldrich"
+            android:layout_marginTop="46dp"
+            android:layout_marginEnd="16dp"
+            android:text="4.3 km"
+            android:textColor="@color/purple_500"
+            android:textSize="34sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/track_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/track_velocity"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/ic_time_track"
+            app:tint="@color/purple_700" />
+
+        <ImageView
+            android:id="@+id/track_velocity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/ic_speed_track"
+            app:layout_constraintTop_toBottomOf="@id/tf_tvdate"
+            app:layout_constraintStart_toStartOf="parent"
+            app:tint="@color/purple_700" />
+
+        <TextView
+            android:id="@+id/tf_tvvelocity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Speed: 3.5 km/h"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/aldrich"
+            android:textColor="@color/purple_500"
+            app:layout_constraintBottom_toBottomOf="@+id/track_velocity"
+            app:layout_constraintStart_toEndOf="@+id/track_velocity"
+            app:layout_constraintTop_toBottomOf="@+id/tf_tvdate" />
+
+        <TextView
+            android:id="@+id/tf_tvtime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/aldrich"
+
+            android:layout_marginStart="8dp"
+            android:text="00:03:32 m"
+            android:textColor="@color/purple_500"
+            app:layout_constraintTop_toTopOf="@id/track_time"
+            app:layout_constraintStart_toEndOf="@id/track_time"
+            app:layout_constraintBottom_toBottomOf="@id/track_time"
+            />
+
+        <ImageButton
+            android:id="@+id/tf_btndelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="14dp"
+            android:layout_marginBottom="12dp"
+            android:background="@null"
+            android:src="@drawable/ic_delete"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tf_tvdistance"
+            app:tint="@color/black" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

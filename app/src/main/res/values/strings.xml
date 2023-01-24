@@ -10,6 +10,7 @@
     <string name="location_disabled_title">Location is disabled</string>
     <string name="location_disabled_message">Do yo want enable GPS?</string>
     <string name="permission_loc_disabled_message">You have not given permission to use the location!</string>
+    <string name="dialog_save">Do you want save this track?</string>
     <string name="settings">Settings</string>
 
     <!-- TODO: Remove or change this placeholder text -->
