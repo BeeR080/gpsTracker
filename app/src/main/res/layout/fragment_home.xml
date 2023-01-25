@@ -43,12 +43,15 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <LinearLayout
+        android:id="@+id/fh_date_list"
         android:layout_width="240dp"
         android:layout_height="200dp"
         android:layout_marginStart="8dp"
         android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"
+        >
 
 
         <TextView
@@ -71,7 +74,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:background="#99FFFFFF"
-            android:text="Averge velocity: 3.5km/h"
+            android:text="Averge velocity: 0.0 km/h"
             android:textColor="@color/black"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -84,7 +87,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:background="#99FFFFFF"
-            android:text="Velocity: 3.5km/h"
+            android:text="Velocity: 0.0 km/h"
             android:textColor="@color/black"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -97,7 +100,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:background="#99FFFFFF"
-            android:text="Distance: 1.5km"
+            android:text="Distance: 0.0 km"
             android:textColor="@color/black"
             android:textSize="24sp"
             app:layout_constraintStart_toStartOf="parent"

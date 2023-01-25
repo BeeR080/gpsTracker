@@ -1,6 +1,7 @@
 package com.beer080.gpstracker.main.data
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
@@ -13,6 +14,10 @@ interface DaoTrack {
 
     @Query("SELECT * FROM TRACKS")
     fun getAllTracks(): Flow<List<TrackItem>>
+
+    @Delete
+    suspend fun deleteTrack(trackItem: TrackItem)
+
 
 
 }

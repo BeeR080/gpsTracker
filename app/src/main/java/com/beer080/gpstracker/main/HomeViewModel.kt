@@ -9,11 +9,16 @@ import kotlinx.coroutines.launch
 class HomeViewModel(dataBase: MainDataBase): ViewModel() {
     val dao = dataBase.getDao()
     val locationUpdates = MutableLiveData<LocationModel>()
+    val currentTrack = MutableLiveData<TrackItem>()
     val timeData = MutableLiveData<String>()
     val tracksList = dao.getAllTracks().asLiveData()
 
     fun addTracks(trackItem: TrackItem) = viewModelScope.launch {
         dao.addTrack(trackItem)
+    }
+
+    fun deleteTrack(trackItem: TrackItem) = viewModelScope.launch {
+        dao.deleteTrack(trackItem)
     }
 
     class ViewModelFactory(private val dataBase: MainDataBase) : ViewModelProvider.Factory{
