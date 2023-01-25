@@ -84,6 +84,7 @@ class HomeFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         checkLocPermission()
+        firstStart = true
     }
 
     private fun mapSettings() {
@@ -109,8 +110,9 @@ class HomeFragment : Fragment() {
             enableFollowLocation()
             runOnFirstFix {
                 map.overlays.clear()
-                map.overlays.add(mLocOverlay)
                 map.overlays.add(polyline)
+                map.overlays.add(mLocOverlay)
+
             }
         }
 
@@ -350,7 +352,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun addPoint(list: List<GeoPoint>) {
-        polyline?.addPoint(list[list.size - 1])
+        if(list.isNotEmpty()) polyline?.addPoint(list[list.size - 1])
 
     }
 

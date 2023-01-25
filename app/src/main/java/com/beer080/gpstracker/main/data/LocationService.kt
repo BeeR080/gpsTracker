@@ -14,6 +14,7 @@ import android.os.Looper
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.preference.PreferenceManager
 import com.beer080.gpstracker.R
 import com.beer080.gpstracker.main.view.MainActivity
 import com.google.android.gms.location.*
@@ -60,6 +61,7 @@ class LocationService: Service() {
 
                    distance+= lastLocation?.distanceTo(currentLoc ?: lastLocation) ?: 0.0f
                     geoPointsList.add(GeoPoint(currentLoc.latitude,currentLoc.longitude))
+
                     val locModel = LocationModel(
                         currentLoc.speed,
                         distance,
@@ -67,6 +69,7 @@ class LocationService: Service() {
                         )
                 sendLocData(locModel)
             }
+
             lastLocation = currentLoc
         }
     }
@@ -106,10 +109,14 @@ class LocationService: Service() {
     }
 
     private fun initLoc(){
+        val updateInterval = PreferenceManager.getDefaultSharedPreferences(
+            this,
+
+        ).getString("update_time_key","3000")?.toLong() ?:3000
         locRequest = LocationRequest.create()
             .apply {
-                this.interval = 5000
-                this.fastestInterval = 5000
+                this.interval = updateInterval
+                this.fastestInterval = updateInterval
                 this.priority = PRIORITY_HIGH_ACCURACY
         }
         locProvider = LocationServices.getFusedLocationProviderClient(baseContext)
